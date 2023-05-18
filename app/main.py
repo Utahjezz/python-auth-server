@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.config.settings import Settings
 from app.api.endpoint.api import router
 from app.log.logging_conf import get_logging_config
+from app.repository.postgres import database
 
 __version__ = "0.0.1"
 logging.config.dictConfig(get_logging_config(settings=Settings()))
@@ -27,9 +28,12 @@ app = create_app()
 @app.on_event("startup")
 async def startup_event():
     logging.info(f"Application version: {__version__}")
+    await database.connect()
     logging.info("Application Ready!")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logging.info("Shutting down")
+    await database.disconnect()
+    logging.info("Application shutdown complete!")
