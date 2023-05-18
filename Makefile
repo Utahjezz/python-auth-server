@@ -19,5 +19,8 @@ bump:
 push-tags:
 	git push --tags
 
-run:
-	PYTHONPATH=. python app/asgi.py
+run-local:
+	PYTHONPATH=. env $(cat .env.local) python app/asgi.py
+
+docker-run-local-db:
+	@ docker run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=auth postgres:14.2-alpine

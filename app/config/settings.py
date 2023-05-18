@@ -3,7 +3,7 @@ from pydantic import BaseSettings, Field, SecretStr
 
 class PostgresSettings(BaseSettings):
     host: str = Field("localhost", env="DB_HOST")
-    database_name: str = Field("ocus", env="DB_NAME")
+    database_name: str = Field("auth", env="DB_NAME")
     user: SecretStr = Field("postgres", env="DB_USER")
     password: SecretStr = Field("postgres", env="DB_PASSWORD")
     min_size_pool: int = Field(2, env="DB_MIN_POOL_SIZE")
