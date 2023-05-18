@@ -14,6 +14,11 @@ class JWTSettings(BaseSettings):
     expiration_minutes: int = Field(env="JWT_EXPIRATION_MINUTES", default=60 * 24 * 3)
     secret_key: str = Field(env="JWT_SECRET_KEY", default="super-secret-key##")
     crypto_algorithm: str = Field(env="JWT_CRYPTO_ALGORITHM", default="HS256")
+    otp_token_expiration_seconds: int = Field(env="JWT_OTP_TOKEN_EXPIRATION_SECONDS", default=300)
+
+
+class OTPSettings(BaseSettings):
+    digits: str = Field(env="OTP_DIGITS", default="0123456789")
 
 
 class Settings(BaseSettings):

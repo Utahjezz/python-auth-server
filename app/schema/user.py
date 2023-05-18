@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, EmailStr, SecretStr
 
 
 class RegisterUserRequest(BaseModel):
-    email: EmailStr = Field(..., description="Email of the user", example="joe.doe@email.com")
+    email: str = Field(..., description="Email of the user", example="joe.doe@email.com")
     password: SecretStr = Field(
         ..., description="Password of the user", example="supersecret@#password"
     )
@@ -26,3 +26,7 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str = Field(..., description="Access token of the user")
+
+
+class OtpRequest(BaseModel):
+    otp: str = Field(..., description="OTP of the user", example="123456")

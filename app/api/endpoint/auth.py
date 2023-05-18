@@ -1,11 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+from app.model.user import User
 from app.repository import UserAlreadyExistsError
-from app.schema.user import RegisterUserRequest, RegisterUserResponse, LoginResponse, LoginRequest
+from app.schema.user import (
+    RegisterUserRequest,
+    RegisterUserResponse,
+    LoginResponse,
+    LoginRequest,
+    OtpRequest,
+)
 from app.service import InvalidCredentialsError
-from app.service.auth import AuthService, get_auth_service
+from app.service.auth import AuthService, get_auth_service, jwt_authentication_handler
 
 router = APIRouter()
+
+bearer_scheme = HTTPBearer()
 
 
 @router.post("/register", status_code=201, response_model=RegisterUserResponse)
@@ -43,3 +53,24 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
     # don't need to catch ValidationError because FastAPI does it for us
     # don't need to catch generic Exception because FastAPI does it for us
+
+
+@router.post("/login/otp", status_code=200, response_model=LoginResponse)
+async def otp_validation(
+    request: OtpRequest,
+    token: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    try:
+        access_token = await auth_service.verify_otp(
+            credentials=token,
+            otp=request.otp,
+        )
+        return LoginResponse(access_token=access_token)
+    except InvalidCredentialsError:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+@router.get("/login/token/validate")
+async def validate_token(user: User = Depends(jwt_authentication_handler)):
+    return {"message": f"Token is valid! Welcome {user.first_name}"}

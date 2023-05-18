@@ -39,6 +39,14 @@ class UserRepository:
             raise UserNotFoundError("User not found")
         return User.from_db(user)
 
+    async def get_user_by_id(self, user_id: str) -> User:
+        query = user_query.get_user_by_id
+        values = {"id": user_id}
+        user = await self.db_conn.fetch_one(query=query, values=values)
+        if user is None:
+            raise UserNotFoundError("User not found")
+        return User.from_db(user)
+
 
 def get_user_repository(db_conn: Connection = Depends(get_db_connection)) -> UserRepository:
     return UserRepository(db_conn=db_conn)
