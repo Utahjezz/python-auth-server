@@ -10,12 +10,19 @@ class PostgresSettings(BaseSettings):
     max_size_pool: int = Field(10, env="DB_MAX_POOL_SIZE")
 
 
+class JWTSettings(BaseSettings):
+    expiration_minutes: int = Field(env="JWT_EXPIRATION_MINUTES", default=60 * 24 * 3)
+    secret_key: str = Field(env="JWT_SECRET_KEY", default="super-secret-key##")
+    crypto_algorithm: str = Field(env="JWT_CRYPTO_ALGORITHM", default="HS256")
+
+
 class Settings(BaseSettings):
     app_name: str = "app"
     debug_mode: bool = False
     log_level: str = Field(env="LOG_LEVEL", default="DEBUG")
 
     postgres: PostgresSettings = PostgresSettings()
+    jwt: JWTSettings = JWTSettings()
 
 
 def get_settings() -> Settings:

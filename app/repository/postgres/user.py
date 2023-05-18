@@ -4,8 +4,8 @@ from asyncpg import UniqueViolationError
 from databases.core import Connection
 from fastapi import Depends
 
-from app.hash import get_password_hash
-from app.repository import UserAlreadyExistsError
+from app.model.user import User
+from app.repository import UserAlreadyExistsError, UserNotFoundError
 from app.repository.postgres import user_query, get_db_connection
 
 
@@ -17,10 +17,9 @@ class UserRepository:
         self, email: str, password: str, first_name: str, last_name: str, two_factor_enabled: bool
     ) -> str:
         query = user_query.insert_user
-        hashed_pass = get_password_hash(password)
         values = {
             "email": email,
-            "password": hashed_pass,
+            "password": password,
             "first_name": first_name,
             "last_name": last_name,
             "two_factor_enabled": two_factor_enabled,
@@ -31,6 +30,14 @@ class UserRepository:
         except UniqueViolationError as e:
             logging.exception(e)
             raise UserAlreadyExistsError("User already exists")
+
+    async def get_user_by_email(self, email: str) -> User:
+        query = user_query.get_user_by_email
+        values = {"email": email}
+        user = await self.db_conn.fetch_one(query=query, values=values)
+        if user is None:
+            raise UserNotFoundError("User not found")
+        return User.from_db(user)
 
 
 def get_user_repository(db_conn: Connection = Depends(get_db_connection)) -> UserRepository:

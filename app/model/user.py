@@ -16,9 +16,9 @@ class User(BaseModel):
     @classmethod
     def from_db(cls, row) -> "User":
         return cls(
-            id=row["id"],
+            id=str(row["id"]),
             email=row["email"],
-            password=row["password"],
+            password=SecretStr(row["password"]),
             first_name=row["first_name"],
             last_name=row["last_name"],
             two_factor_enabled=row["two_factor_enabled"],

@@ -4,4 +4,4 @@ asgi-correlation-id==3.2.*
 databases[postgresql]==0.7.*
 passlib[bcrypt]==1.7.*
 email-validator==2.0.*
-httpx==0.24.*
+python-jose[cryptography]==3.3.*

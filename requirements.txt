@@ -6,7 +6,6 @@
 #
 anyio==3.6.2
     # via
-    #   httpcore
     #   starlette
     #   watchfiles
 asgi-correlation-id==3.2.2
@@ -15,48 +14,52 @@ asyncpg==0.27.0
     # via databases
 bcrypt==4.0.1
     # via passlib
-certifi==2023.5.7
-    # via
-    #   httpcore
-    #   httpx
+cffi==1.15.1
+    # via cryptography
 click==8.1.3
     # via uvicorn
+cryptography==40.0.2
+    # via python-jose
 databases[postgresql]==0.7.0
     # via -r requirements.in
 dnspython==2.3.0
     # via email-validator
+ecdsa==0.18.0
+    # via python-jose
 email-validator==2.0.0.post2
     # via -r requirements.in
 fastapi==0.95.2
     # via -r requirements.in
 h11==0.14.0
-    # via
-    #   httpcore
-    #   uvicorn
-httpcore==0.17.1
-    # via httpx
+    # via uvicorn
 httptools==0.5.0
     # via uvicorn
-httpx==0.24.0
-    # via -r requirements.in
 idna==3.4
     # via
     #   anyio
     #   email-validator
-    #   httpx
 passlib[bcrypt]==1.7.4
     # via -r requirements.in
+pyasn1==0.5.0
+    # via
+    #   python-jose
+    #   rsa
+pycparser==2.21
+    # via cffi
 pydantic==1.10.7
     # via fastapi
 python-dotenv==1.0.0
     # via uvicorn
+python-jose[cryptography]==3.3.0
+    # via -r requirements.in
 pyyaml==6.0
     # via uvicorn
+rsa==4.9
+    # via python-jose
+six==1.16.0
+    # via ecdsa
 sniffio==1.3.0
-    # via
-    #   anyio
-    #   httpcore
-    #   httpx
+    # via anyio
 sqlalchemy==1.4.48
     # via databases
 starlette==0.27.0
