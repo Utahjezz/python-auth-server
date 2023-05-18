@@ -4,10 +4,10 @@ setup-local-env:
 	pip install -r requirements-dev.txt
 	pre-commit install
 
-requirements-dev.txt:
+requirements-dev.txt: requirements-dev.in
 	pip-compile requirements-dev.in --output-file $@
 
-requirements.txt:
+requirements.txt: requirements.in
 	pip-compile requirements.in --output-file $@
 
 install:
