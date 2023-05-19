@@ -19,6 +19,7 @@ class JWTSettings(BaseSettings):
 
 class OTPSettings(BaseSettings):
     digits: str = Field(env="OTP_DIGITS", default="0123456789")
+    length: int = Field(env="OTP_LENGTH", default=6)
 
 
 class Settings(BaseSettings):
@@ -28,6 +29,7 @@ class Settings(BaseSettings):
 
     postgres: PostgresSettings = PostgresSettings()
     jwt: JWTSettings = JWTSettings()
+    otp: OTPSettings = OTPSettings()
 
 
 def get_settings() -> Settings:

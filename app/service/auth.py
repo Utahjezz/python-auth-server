@@ -13,7 +13,7 @@ from app.model.user import User
 from app.repository import UserNotFoundError
 from app.repository.postgres.user import UserRepository, get_user_repository
 from app.service import InvalidCredentialsError
-from app.service.otp import OTPSenderService
+from app.service.otp import OTPSenderService, LogOTPSenderService
 
 OTP_TOKEN_TYPE = "otp_temp_token"
 ACCESS_TOKEN_TYPE = "access_token"
@@ -41,8 +41,11 @@ class AuthService:
         )
 
     async def authenticate_user(self, email: str, password: str) -> Optional[str]:
-        user = await self.user_repository.get_user_by_email(email=email)
-        if user and verify_password(password, user.password.get_secret_value()):
+        try:
+            user = await self.user_repository.get_user_by_email(email=email)
+        except UserNotFoundError:
+            raise InvalidCredentialsError("Invalid credentials")
+        if verify_password(password, user.password.get_secret_value()):
             if not user.two_factor_enabled:
                 return self.generate_jwt_token(data={"sub": user.id, "type": ACCESS_TOKEN_TYPE})
             else:
@@ -121,14 +124,11 @@ class AuthService:
         except UserNotFoundError:
             raise InvalidCredentialsError("Invalid credentials")
 
-    @staticmethod
-    def generate_otp() -> str:
-        digits = "0123456789"
+    def generate_otp(self) -> str:
+        digits = self.app_settings.otp.digits
         OTP = ""
 
-        # length of password can be changed
-        # by changing value in range
-        for i in range(6):
+        for i in range(self.app_settings.otp.length):
             OTP += digits[math.floor(random.random() * 10)]
 
         return OTP
@@ -137,7 +137,7 @@ class AuthService:
 def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
     app_settings: Settings = Depends(get_settings),
-    otp_service: OTPSenderService = Depends(OTPSenderService),
+    otp_service: OTPSenderService = Depends(LogOTPSenderService),
 ) -> AuthService:
     return AuthService(
         user_repository=user_repository, app_settings=app_settings, otp_service=otp_service

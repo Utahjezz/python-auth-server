@@ -111,7 +111,7 @@ async def test_authenticate_user_wrong_pass(mocker, auth_service):
 async def test_authenticate_user_not_found(mocker, auth_service):
     mocker.patch(
         "app.repository.postgres.user.UserRepository.get_user_by_email",
-        return_value=None,
+        side_effect=UserNotFoundError,
     )
     mocker.patch("app.hash.pwd_context.verify", return_value=False)
 

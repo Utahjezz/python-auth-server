@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, EmailStr, SecretStr
 
 
 class RegisterUserRequest(BaseModel):
-    email: str = Field(..., description="Email of the user", example="joe.doe@email.com")
+    email: EmailStr = Field(..., description="Email of the user", example="joe.doe@email.com")
     password: SecretStr = Field(
         ..., description="Password of the user", example="supersecret@#password"
     )
