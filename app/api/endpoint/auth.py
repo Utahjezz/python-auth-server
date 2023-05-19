@@ -18,7 +18,12 @@ router = APIRouter()
 bearer_scheme = HTTPBearer()
 
 
-@router.post("/register", status_code=201, response_model=RegisterUserResponse)
+@router.post(
+    "/register",
+    status_code=201,
+    response_model=RegisterUserResponse,
+    description="Register a new user",
+)
 async def register(
     request: RegisterUserRequest,
     auth_service: AuthService = Depends(get_auth_service),
@@ -38,7 +43,7 @@ async def register(
     # don't need to catch generic Exception because FastAPI does it for us
 
 
-@router.post("/login", status_code=200, response_model=LoginResponse)
+@router.post("/login", status_code=200, response_model=LoginResponse, description="Login a user")
 async def login(
     request: LoginRequest,
     auth_service: AuthService = Depends(get_auth_service),
@@ -55,7 +60,9 @@ async def login(
     # don't need to catch generic Exception because FastAPI does it for us
 
 
-@router.post("/login/otp", status_code=200, response_model=LoginResponse)
+@router.post(
+    "/login/otp", status_code=200, response_model=LoginResponse, description="Login a user with OTP"
+)
 async def otp_validation(
     request: OtpRequest,
     token: HTTPAuthorizationCredentials = Depends(bearer_scheme),
@@ -71,6 +78,6 @@ async def otp_validation(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
-@router.get("/login/token/validate")
+@router.get("/login/token/validate", description="Example of a protected endpoint")
 async def validate_token(user: User = Depends(jwt_authentication_handler)):
     return {"message": f"Token is valid! Welcome {user.first_name}"}

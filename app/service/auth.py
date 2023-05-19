@@ -1,3 +1,4 @@
+import logging
 import math
 import random
 from datetime import timedelta, datetime
@@ -31,6 +32,7 @@ class AuthService:
     async def register_user(
         self, email: str, password: str, first_name: str, last_name: str, two_factor_enabled: bool
     ) -> str:
+        # hash the password before storing it
         hashed_pass = get_password_hash(password)
         return await self.user_repository.insert_user(
             email=email,
@@ -41,16 +43,24 @@ class AuthService:
         )
 
     async def authenticate_user(self, email: str, password: str) -> Optional[str]:
+        # try to get the user from the database
         try:
             user = await self.user_repository.get_user_by_email(email=email)
+            logging.debug(f"User found: {user}")
         except UserNotFoundError:
             raise InvalidCredentialsError("Invalid credentials")
+        # verify the password against the stored hash
         if verify_password(password, user.password.get_secret_value()):
+            logging.debug("Password verified")
             if not user.two_factor_enabled:
+                logging.debug("2FA not enabled, returning access token")
                 return self.generate_jwt_token(data={"sub": user.id, "type": ACCESS_TOKEN_TYPE})
             else:
+                logging.debug("2FA enabled, sending OTP")
                 random_otp = self.generate_otp()
                 self.otp_service.send_otp(user.email, random_otp)
+                # after generating the OTP, we return a temporary token that contains the OTP hash
+                logging.debug("Returning temporary token")
                 return self.generate_jwt_token(
                     data={"sub": user.id, "type": OTP_TOKEN_TYPE, "otp": get_otp_hash(random_otp)},
                     expires_delta=timedelta(
@@ -63,17 +73,21 @@ class AuthService:
     async def verify_otp(
         self, credentials: HTTPAuthorizationCredentials, otp: str
     ) -> Optional[str]:
+        logging.debug("Verifying OTP")
         if credentials.scheme != "Bearer":
             raise InvalidCredentialsError("Invalid authentication scheme")
 
         jwt_token = credentials.credentials
         try:
+            logging.debug("Decoding JWT token")
             payload = jwt.decode(
                 jwt_token,
                 self.app_settings.jwt.secret_key,
                 algorithms=[self.app_settings.jwt.crypto_algorithm],
             )
+            logging.debug(f"Valid signed JWT, payload: {payload}")
             if payload["type"] == OTP_TOKEN_TYPE and verify_otp(otp, payload["otp"]):
+                logging.debug("OTP verified, returning access token")
                 return self.generate_jwt_token(
                     data={"sub": payload["sub"], "type": ACCESS_TOKEN_TYPE}
                 )
@@ -125,6 +139,11 @@ class AuthService:
             raise InvalidCredentialsError("Invalid credentials")
 
     def generate_otp(self) -> str:
+        """
+        Generates a random OTP using a random digits generator,
+        could be replaced with a more secure one
+        :return: the generated OTP
+        """
         digits = self.app_settings.otp.digits
         OTP = ""
 
