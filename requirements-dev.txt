@@ -18,6 +18,8 @@ colorama==0.4.6
     # via commitizen
 commitizen==3.2.2
     # via -r requirements-dev.in
+coverage==7.2.5
+    # via pytest-cov
 decli==0.6.0
     # via commitizen
 distlib==0.3.6
@@ -61,8 +63,11 @@ pytest==7.3.1
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
+    #   pytest-cov
     #   pytest-mock
 pytest-asyncio==0.21.0
+    # via -r requirements-dev.in
+pytest-cov==2.9.0
     # via -r requirements-dev.in
 pytest-mock==3.10.0
     # via -r requirements-dev.in

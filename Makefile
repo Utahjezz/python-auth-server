@@ -24,3 +24,6 @@ run-local:
 
 docker-run-local-db:
 	@ docker run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=auth postgres:14.2-alpine
+
+run-tests:
+	pytest -v --cov

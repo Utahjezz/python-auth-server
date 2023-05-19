@@ -111,10 +111,15 @@ class AuthService:
                 return await self.user_repository.get_user_by_id(payload["sub"])
             else:
                 raise InvalidCredentialsError("Invalid credentials")
-        except jwt.JWTError | UserNotFoundError:
+        except InvalidCredentialsError:
+            raise
+        except jwt.JWTError:
+            raise InvalidCredentialsError("Invalid credentials")
+        except UserNotFoundError:
             raise InvalidCredentialsError("Invalid credentials")
 
-    def generate_otp(self):
+    @staticmethod
+    def generate_otp() -> str:
         digits = "0123456789"
         OTP = ""
 
