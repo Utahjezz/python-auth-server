@@ -7,7 +7,7 @@ experimental_string_processing = true
 line-length = 100
 
 [tool.commitizen]
-version = "0.0.1"
+version = "1.0.0"
 tag_format = "v$version"
 version_files = [
   "pyproject.toml:version",
