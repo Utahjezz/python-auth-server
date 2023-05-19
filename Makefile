@@ -27,3 +27,15 @@ docker-run-local-db:
 
 run-tests:
 	pytest -v --cov
+
+build-docker:
+	@ docker build -t auth-backend .
+
+run-docker: build-docker
+	@ PORT=5050 docker run --rm -it -p 5050:5050 --env-file .env.local.docker auth-backend
+
+docker-test:
+	@ docker build --target test -t auth-backend-tests .
+
+docker-run-tests: docker-test
+	@ docker run --rm -it auth-backend-tests
