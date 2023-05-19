@@ -14,3 +14,10 @@ version_files = [
   "app/main.py:APP_VERSION"
 ]
 update_changelog_on_bump = true
+
+[tool.pytest.ini_options]
+minversion = "7.3"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
