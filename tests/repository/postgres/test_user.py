@@ -7,13 +7,23 @@ from app.repository import UserAlreadyExistsError, UserNotFoundError
 from app.repository.postgres.user import UserRepository
 
 
+@pytest.fixture
+def db_conn(mocker):
+    conn = mocker.Mock(spec=Connection)
+    return conn
+
+
+@pytest.fixture
+def user_repository(mocker, db_conn):
+    user_repository = UserRepository(db_conn=db_conn)
+    return user_repository
+
+
 @pytest.mark.asyncio
-async def test_insert_user_success(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_insert_user_success(create_user_request, db_conn, user_repository):
     db_conn.execute.return_value = "1"
     _input = create_user_request
 
-    user_repository = UserRepository(db_conn=db_conn)
     user_id = await user_repository.insert_user(**_input)
 
     assert user_id == "1"
@@ -28,24 +38,18 @@ returning id
 
 
 @pytest.mark.asyncio
-async def test_insert_user_failure(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_insert_user_failure(create_user_request, db_conn, user_repository):
     db_conn.execute.side_effect = UniqueViolationError("error")
     _input = create_user_request
-
-    user_repository = UserRepository(db_conn=db_conn)
 
     with pytest.raises(UserAlreadyExistsError):
         await user_repository.insert_user(**_input)
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_success(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_get_user_by_email_success(create_user_request, db_conn, user_repository):
     db_conn.fetch_one.return_value = dict(**create_user_request, id="1")
     _input = create_user_request
-
-    user_repository = UserRepository(db_conn=db_conn)
     user = await user_repository.get_user_by_email(_input["email"])
 
     assert user.id == "1"
@@ -65,24 +69,19 @@ select id, email, password, first_name, last_name, two_factor_enabled
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email_not_found(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_get_user_by_email_not_found(create_user_request, db_conn, user_repository):
     db_conn.fetch_one.return_value = None
     _input = create_user_request
-
-    user_repository = UserRepository(db_conn=db_conn)
 
     with pytest.raises(UserNotFoundError):
         await user_repository.get_user_by_email(_input["email"])
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id_success(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_get_user_by_id_success(create_user_request, db_conn, user_repository):
     db_conn.fetch_one.return_value = dict(**create_user_request, id="1")
     _input = create_user_request
 
-    user_repository = UserRepository(db_conn=db_conn)
     user = await user_repository.get_user_by_id("1")
 
     assert user.id == "1"
@@ -102,11 +101,8 @@ select id, email, password, first_name, last_name, two_factor_enabled
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id_not_found(mocker, create_user_request):
-    db_conn = mocker.Mock(spec=Connection)
+async def test_get_user_by_id_not_found(create_user_request, db_conn, user_repository):
     db_conn.fetch_one.return_value = None
-
-    user_repository = UserRepository(db_conn=db_conn)
 
     with pytest.raises(UserNotFoundError):
         await user_repository.get_user_by_id("1")
