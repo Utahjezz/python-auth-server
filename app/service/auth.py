@@ -1,4 +1,3 @@
-import logging
 import math
 import random
 from datetime import timedelta, datetime
@@ -14,6 +13,7 @@ from app.model.user import User
 from app.repository import UserNotFoundError
 from app.repository.postgres.user import UserRepository, get_user_repository
 from app.service import InvalidCredentialsError
+from app.service.otp import OTPSenderService
 
 OTP_TOKEN_TYPE = "otp_temp_token"
 ACCESS_TOKEN_TYPE = "access_token"
@@ -21,9 +21,12 @@ bearer_scheme = HTTPBearer()
 
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository, app_settings: Settings):
+    def __init__(
+        self, user_repository: UserRepository, app_settings: Settings, otp_service: OTPSenderService
+    ):
         self.user_repository = user_repository
         self.app_settings = app_settings
+        self.otp_service = otp_service
 
     async def register_user(
         self, email: str, password: str, first_name: str, last_name: str, two_factor_enabled: bool
@@ -44,7 +47,7 @@ class AuthService:
                 return self.generate_jwt_token(data={"sub": user.id, "type": ACCESS_TOKEN_TYPE})
             else:
                 random_otp = self.generate_otp()
-                logging.info(f"OTP for user {user.id} is {random_otp}")
+                self.otp_service.send_otp(user.email, random_otp)
                 return self.generate_jwt_token(
                     data={"sub": user.id, "type": OTP_TOKEN_TYPE, "otp": get_otp_hash(random_otp)},
                     expires_delta=timedelta(
@@ -134,8 +137,11 @@ class AuthService:
 def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
     app_settings: Settings = Depends(get_settings),
+    otp_service: OTPSenderService = Depends(OTPSenderService),
 ) -> AuthService:
-    return AuthService(user_repository=user_repository, app_settings=app_settings)
+    return AuthService(
+        user_repository=user_repository, app_settings=app_settings, otp_service=otp_service
+    )
 
 
 async def jwt_authentication_handler(
