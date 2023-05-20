@@ -1,3 +1,9 @@
+## v1.0.1 (2023-05-20)
+
+### Refactor
+
+- **auth-schema**: move auth schema on endpoints handlers
+
 ## v1.0.0 (2023-05-19)
 
 ### Feat
