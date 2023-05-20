@@ -11,11 +11,18 @@ from app.schema.user import (
     OtpRequest,
 )
 from app.service import InvalidCredentialsError
-from app.service.auth import AuthService, get_auth_service, jwt_authentication_handler
+from app.service.auth import AuthService, get_auth_service
 
 router = APIRouter()
 
 bearer_scheme = HTTPBearer()
+
+
+async def jwt_authentication_handler(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
+    return await auth_service.verify_jwt_token(credentials)
 
 
 @router.post(

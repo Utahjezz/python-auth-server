@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from typing import Optional, Dict
 
 from fastapi import Depends
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
 from jose import jwt
 
 from app.config.settings import Settings, get_settings
@@ -18,7 +18,6 @@ from app.service.otp import OTPSenderService, LogOTPSenderService
 
 OTP_TOKEN_TYPE = "otp_temp_token"
 ACCESS_TOKEN_TYPE = "access_token"
-bearer_scheme = HTTPBearer()
 
 
 class AuthService:
@@ -161,10 +160,3 @@ def get_auth_service(
     return AuthService(
         user_repository=user_repository, app_settings=app_settings, otp_service=otp_service
     )
-
-
-async def jwt_authentication_handler(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    auth_service: AuthService = Depends(get_auth_service),
-) -> User:
-    return await auth_service.verify_jwt_token(credentials)
