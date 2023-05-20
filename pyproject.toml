@@ -11,7 +11,7 @@ version = "1.0.1"
 tag_format = "v$version"
 version_files = [
   "pyproject.toml:version",
-  "app/main.py:APP_VERSION"
+  "app/main.py:__version__"
 ]
 update_changelog_on_bump = true
 

@@ -7,7 +7,7 @@ from app.api.endpoint.api import router
 from app.log.logging_conf import get_logging_config
 from app.repository.postgres import database
 
-__version__ = "0.0.1"
+__version__ = "1.0.1"
 logging.config.dictConfig(get_logging_config(settings=Settings()))
 
 
